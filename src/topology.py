@@ -95,22 +95,37 @@ class Topology:
                 connectivity[point-1][3] = connectivity[point-1][0] + (self.nelz+1)
                 connectivity[point-1][4:8] = (connectivity[point-1][0:4]+1)
             return (connectivity-1).astype(int) 
-        else:
+        else:   
             connectivity = self.connections
             
         return connectivity
+
+    def getConnectedElements(self):
+
+        if self.readFromCache == False:
+            nconnections = np.zeros((self.getNumNodes(), 8))
+        
+            for element in range(1, self.getNumNodes()+1):
+                row, col = np.where(self.getConnections() == element)
+                end = len(row)
+                row = row[::-1]
+                nconnections[element-1][0:end] = row + 1
+        else:
+            nconnections = self.conelements
+
+        return nconnections
         
     def getCoordinates(self):
         
         if self.readFromCache == False:
 
-            coordinates = np.zeros((self.getNumConnections(), 3))
+            coordinates = np.zeros((self.getNumNodes(), 3))
         
             dx = self.length / self.nelx
             dy = self.width / self.nely 
             dz = self.height / self.nelz
         
-            for point in range(1, self.getNumConnections()+1):
+            for point in range(1, self.getNumNodes()+1):
                 nx = np.fix((point-1)/((self.nely+1)*(self.nelz+1))) + 1
                 ny = np.fix(((point-(nx-1)*(self.nely+1)*(self.nelz+1))-1)/(self.nelz+1)) + 1
                 nz = np.mod(point, (self.nelz+1))
